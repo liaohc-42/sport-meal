@@ -9,8 +9,9 @@ node_modules/
 
 # build / preview
 dist/
-frontend/shot-*.png
-frontend/sample-menu.png
+
+# OCR runtime language packs (Tesseract downloads them on demand)
+backend/*.traineddata
 
 # local sqlite / logs
 backend/data/*.db
