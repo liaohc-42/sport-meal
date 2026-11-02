@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0e2418">
+  <meta name="description" content="练完吃啥 Pro：把今天的运动量、食堂菜单和营养目标算成一份能执行的餐盘。">
+  <title>练完吃啥 Pro · 运动 × 食堂饮食</title>
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <a class="brand" href="./">
+        <span class="brand-mark">🥗</span>
+        <span class="brand-copy">
+          <strong>练完吃啥 <em>Pro</em></strong>
+          <small>运动 × 食堂 · 今日决策台</small>
+        </span>
+      </a>
+      <div class="top-meta">
+        <span class="clock" id="clock">--</span>
+        <span class="status-pill" id="api-status"><i></i> 连接后端中</span>
+        <button class="icon-btn" id="open-help" title="使用说明" aria-label="使用说明">?</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-main">
+        <p class="kicker">TODAY · 运动与饮食一起算</p>
+        <h1>今天练多少，<br><span>就吃多少。</span></h1>
+        <p class="hero-sub">先把训练量拉出来，再把你眼前食堂的菜放进去。营养检索、份量、教练建议，一次讲清。</p>
+        <div class="goal-tabs" id="goal-tabs" role="group" aria-label="今日目标">
+          <button data-goal="cut" class="goal-btn active"><b>减脂</b><small>热量小缺口</small></button>
+          <button data-goal="gain" class="goal-btn"><b>增肌</b><small>蛋白优先</small></button>
+          <button data-goal="keep" class="goal-btn"><b>维持</b><small>训练日平衡</small></button>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <span>今日总消耗</span>
+          <b id="stat-tdee">—</b>
+          <small>kcal · 含训练</small>
+        </div>
+        <div class="stat-card highlight">
+          <span>这一餐目标</span>
+          <b id="stat-meal-kcal">—</b>
+          <small>kcal · 按餐次折算</small>
+        </div>
+        <div class="stat-card">
+          <span>蛋白目标</span>
+          <b id="stat-protein">—</b>
+          <small>g · 训练后修复</small>
+        </div>
+        <div class="stat-card">
+          <span>训练额外消耗</span>
+          <b id="stat-exercise">—</b>
+          <small>kcal · 今天</small>
+        </div>
+      </div>
+    </section>
+
+    <main class="layout">
+      <div class="col col-left">
+        <section class="card" id="training-card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">01 / 运动量</p>
+              <h2>今天练了多少？</h2>
+            </div>
+            <span class="mini-chip" id="training-total">0 分钟</span>
+          </div>
+          <p class="muted">拖动数轴，不用填表。训练量会直接影响热量和碳水目标。</p>
+
+          <div class="slider-block">
+            <div class="slider-label">
+              <span><b>力量训练</b><small>深蹲 / 推 / 拉</small></span>
+              <strong><span id="strength-value">45</span> 分钟</strong>
+            </div>
+            <input id="strength-range" type="range" min="0" max="120" step="5" value="45" aria-label="力量训练分钟数">
+            <div class="range-scale"><span>0</span><span>60</span><span>120 分钟</span></div>
+          </div>
+
+          <div class="slider-block">
+            <div class="slider-label">
+              <span><b>有氧 / 球类</b><small>跑步 / 骑行 / 球类</small></span>
+              <strong><span id="cardio-value">20</span> 分钟</strong>
+            </div>
+            <input id="cardio-range" type="range" min="0" max="120" step="5" value="20" aria-label="有氧训练分钟数">
+            <div class="range-scale"><span>0</span><span>60</span><span>120 分钟</span></div>
+          </div>
+
+          <div class="inline-controls">
+            <div class="control-group">
+              <span class="control-label">强度</span>
+              <div class="seg" id="intensity-seg">
+                <button data-intensity="low">轻松</button>
+                <button data-intensity="mid" class="active">正常</button>
+                <button data-intensity="high">很累</button>
+              </div>
+            </div>
+            <div class="control-group">
+              <span class="control-label">每周力量</span>
+              <div class="seg" id="days-seg">
+                <button data-days="2">2 天</button>
+                <button data-days="3" class="active">3 天</button>
+                <button data-days="4">4 天</button>
+                <button data-days="5">5 天</button>
+              </div>
+            </div>
+            <label class="control-group">
+              <span class="control-label">训练经验</span>
+              <select id="experience">
+                <option value="beginner">刚开始</option>
+                <option value="intermediate">半年以上</option>
+                <option value="advanced">两年以上</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="coach-strip" id="training-preview">
+            <span class="coach-icon">🏋️</span>
+            <div>
+              <b>教练先看这里</b>
+              <p>生成计划后，会按你的训练量给出本周安排、热身和恢复提醒。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" id="menu-card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">02 / 今日菜单</p>
+              <h2>食堂有什么，就配什么</h2>
+            </div>
+            <span class="mini-chip" id="menu-count">0 道</span>
+          </div>
+          <p class="muted">输入菜名后，后端会先联网检索营养数据；找不到精确值时，按常识估算并标注“估算值”。</p>
+
+          <div class="menu-tools">
+            <label class="field compact">
+              <span>食堂 / 窗口</span>
+              <select id="canteen">
+                <option>一食堂 · 大众窗口</option>
+                <option>二食堂 · 风味窗口</option>
+                <option>三食堂 · 轻食窗口</option>
+                <option>小卖部 / 加餐</option>
+              </select>
+            </label>
+            <label class="upload-btn" for="menu-image">
+              <span>📷 拍菜单 / 上传图片</span>
+              <input id="menu-image" type="file" accept="image/*" capture="environment">
+            </label>
+          </div>
+          <div class="ocr-status" id="ocr-status" hidden></div>
+
+          <div class="add-dish">
+            <input id="dish-name" type="text" maxlength="30" placeholder="例：番茄炒蛋，或直接输入菜名" aria-label="菜名">
+            <div class="add-dish-meta">
+              <label>份量 <input id="dish-grams" type="number" min="10" max="1000" step="10" value="200"> g</label>
+              <label>价格 <input id="dish-price" type="number" min="0" max="999" step="0.5" placeholder="可选"> 元</label>
+              <button class="btn primary small" id="add-dish">＋ 加入</button>
+            </div>
+          </div>
+
+          <div class="sample-row" id="sample-row">
+            <span>快捷添加：</span>
+            <button class="tag-btn" data-sample="米饭|200|1.5">米饭</button>
+            <button class="tag-btn" data-sample="番茄炒蛋|200|5">番茄炒蛋</button>
+            <button class="tag-btn" data-sample="卤鸡腿|150|6">卤鸡腿</button>
+            <button class="tag-btn" data-sample="蒜蓉西兰花|200|3">蒜蓉西兰花</button>
+            <button class="tag-btn" data-sample="紫菜蛋花汤|300|2">紫菜蛋花汤</button>
+          </div>
+
+          <div class="menu-list" id="menu-list"></div>
+          <div class="menu-summary" id="menu-summary" hidden></div>
+
+          <div class="menu-actions">
+            <button class="btn ghost" id="lookup-nutrition">🔎 先查营养</button>
+            <button class="btn primary" id="generate-plan">生成今日计划 <span>→</span></button>
+          </div>
+        </section>
+
+        <section class="card" id="profile-card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">03 / 你的基础数据</p>
+              <h2>算法需要的几个数</h2>
+            </div>
+            <span class="mini-chip">只用于估算</span>
+          </div>
+          <div class="form-grid">
+            <label class="field">性别
+              <select id="sex">
+                <option value="male">男</option>
+                <option value="female">女</option>
+              </select>
+            </label>
+            <label class="field">年龄<input id="age" type="number" min="14" max="80" value="20"></label>
+            <label class="field">身高 cm<input id="height" type="number" min="130" max="220" value="175"></label>
+            <label class="field">体重 kg<input id="weight" type="number" min="30" max="200" step="0.5" value="68"></label>
+            <label class="field">这一餐
+              <select id="meal">
+                <option value="lunch">午餐</option>
+                <option value="dinner">晚餐</option>
+                <option value="breakfast">早餐</option>
+                <option value="snack">加餐</option>
+              </select>
+            </label>
+            <label class="field">预算上限 元<input id="budget" type="number" min="0" max="999" value="15"></label>
+          </div>
+          <div class="avoid-block">
+            <span class="control-label">不吃的 / 过敏（可多选）</span>
+            <div class="chips" id="avoid-chips"></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col col-right">
+        <section class="card result-card" id="result-card">
+          <div class="result-head">
+            <div>
+              <p class="eyebrow">TODAY'S PLATE</p>
+              <h2 id="result-title">你的今日餐盘</h2>
+            </div>
+            <span class="mini-chip" id="generated-at">等待生成</span>
+          </div>
+          <div id="result-placeholder" class="result-placeholder">
+            <div class="placeholder-icon">🥣</div>
+            <b>先把今天的菜放进来</b>
+            <p>左侧填 2–5 道菜，点“生成今日计划”。后端会先检索营养，再按训练量和目标排一餐。</p>
+            <button class="text-link" id="demo-fill">用示例菜单试一下 →</button>
+          </div>
+          <div id="plan-result" hidden></div>
+        </section>
+
+        <section class="card coach-card">
+          <div class="card-head compact">
+            <div>
+              <p class="eyebrow">FIT COACH</p>
+              <h2>问教练</h2>
+            </div>
+            <span class="mini-chip" id="coach-mode">本地 / AI</span>
+          </div>
+          <div class="chat" id="chat">
+            <div class="chat-msg coach">
+              <span>教练</span>
+              <p>今天练完后最想解决什么？可以问我“蛋白够不够”“晚上怎么吃”“腿酸还能练吗”。</p>
+            </div>
+          </div>
+          <div class="quick-asks" id="quick-asks">
+            <button data-ask="蛋白够不够？">蛋白够不够</button>
+            <button data-ask="练完腿酸，明天还能练吗？">腿酸还能练吗</button>
+            <button data-ask="减脂期食堂怎么选？">减脂怎么选</button>
+          </div>
+          <form class="chat-form" id="chat-form">
+            <input id="chat-input" type="text" maxlength="300" placeholder="问教练一个具体问题…">
+            <button class="btn primary small" type="submit">发送</button>
+          </form>
+          <p class="disclaimer">教练建议为一般性运动营养信息，不替代医生或注册营养师。</p>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <span>练完吃啥 Pro · 运动 × 食堂饮食决策</span>
+      <span>营养值为参考估算 · 过敏原请以食堂实际配料为准</span>
+      <span id="footer-api">API: —</span>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="modal" id="help-modal" aria-hidden="true">
+    <div class="modal-card">
+      <button class="modal-close" id="close-help" aria-label="关闭">×</button>
+      <p class="eyebrow">HOW IT WORKS</p>
+      <h2>三步，把训练变成一餐</h2>
+      <ol class="help-list">
+        <li><b>拉训练量</b><span>力量 / 有氧分钟数决定今天的能量和碳水目标。</span></li>
+        <li><b>放食堂菜单</b><span>手输或拍菜单；后端联网检索营养，找不到就估算并标注。</span></li>
+        <li><b>生成并问教练</b><span>得到餐盘组合、份量、替换建议和本周训练安排。</span></li>
+      </ol>
+      <p class="muted small">后端地址由 <code>frontend/config.js</code> 的 <code>apiBaseUrl</code> 决定。GitHub Pages 构建时由 <code>API_BASE_URL</code> 注入。</p>
+    </div>
+  </div>
+
+  <script src="./config.js"></script>
+  <script src="./assets/app.js"></script>
+</body>
+</html>

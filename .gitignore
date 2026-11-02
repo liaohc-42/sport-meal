@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# local env / secrets
+.env
+.env.*
+!.env.example
+
+# build / preview
+dist/
+frontend/shot-*.png
+frontend/sample-menu.png
+
+# local sqlite / logs
+backend/data/*.db
+backend/data/*.db-*
+*.log
+
+# tools / OS
+.tools/
+.DS_Store
+Thumbs.db

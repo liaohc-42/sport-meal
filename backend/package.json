@@ -1,0 +1,28 @@
+{
+  "name": "sport-meal-backend",
+  "version": "2.0.0",
+  "private": true,
+  "description": "运动 + 食堂饮食计划 API：营养检索、运动教练、计划生成与菜单 OCR",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test test/*.test.js",
+    "build:frontend": "node ../scripts/build-frontend.mjs"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "multer": "^2.0.2",
+    "tesseract.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "supertest": "^7.1.4"
+  }
+}
